@@ -6,16 +6,17 @@ enum FileType:uint8_t {
 	TEXT, BLOB, VIDEO, AUDIO, DOCUMENT, IMAGE, COMPRESSED, FOLDER
 };
 struct FileEntity {
-	uint64_t id;//ÎÄ¼şid
-	uint64_t parent_id;//ÎÄ¼ş¼Ğid 0Îª¸ùÄ¿Â¼
-	FileType type;//ÎÄ¼şÀàĞÍ
-	std::string name;//ÎÄ¼şÃû»òÎÄ¼ş¼ĞÃû
-	uint64_t size;//ÎÄ¼ş´óĞ¡£¨ÎÄ¼ş¼ĞÄÚidËùÕ¼´óĞ¡£©
-	uint64_t create_time;//´´½¨Ê±¼ä
-	uint64_t modify_time;//ĞŞ¸ÄÊ±¼ä
-	std::string ext;//ÎÄ¼şºó×º
-	std::string mimetype;//ÎÄ¼şÀàĞÍ
-	bool deleted;//ÊÇ·ñÉ¾³ı
-	std::vector<char> data;//ÎÄ¼şÓÃ
-	std::vector<uint64_t> ids;// ÎÄ¼ş¼ĞÓÃ
+	uint64_t id;//æ–‡ä»¶id
+	uint64_t parent_id;//æ–‡ä»¶å¤¹id 0ä¸ºæ ¹ç›®å½•
+	FileType type;//æ–‡ä»¶ç±»å‹
+	std::string name;//æ–‡ä»¶åæˆ–æ–‡ä»¶å¤¹å
+	uint64_t size;//æ–‡ä»¶å¤§å°ï¼ˆæ–‡ä»¶å¤¹å†…idæ‰€å å¤§å°ï¼‰
+	uint64_t create_time;//åˆ›å»ºæ—¶é—´
+	uint64_t modify_time;//ä¿®æ”¹æ—¶é—´
+	std::string ext;//æ–‡ä»¶åç¼€
+	std::string mimetype;//æ–‡ä»¶ç±»å‹
+	bool deleted;//æ˜¯å¦åˆ é™¤
+	std::vector<char> data;//æ–‡ä»¶ç”¨
+	std::vector<uint64_t> ids;// æ–‡ä»¶å¤¹ç”¨
+	std::string data_path;//åŠ å¯†æ•°æ®æ–‡ä»¶è·¯å¾„ï¼ˆæ–°å¢ï¼‰
 };

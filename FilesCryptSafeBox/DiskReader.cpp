@@ -5,6 +5,8 @@
 #include <openssl/evp.h>
 #include <openssl/rsa.h>
 #include "CryptoEngine.h"
+#include <filesystem>
+
 DiskReader::DiskReader()
 {
 }
@@ -13,8 +15,37 @@ DiskReader::~DiskReader()
 {
 }
 
+std::string DiskReader::GetDataFilePath(std::string boxDir, uint64_t fileId) {
+    // 注意：这个函数应该与DiskWriter中的实现一致
+    // 由于我们不知道boxPath，这里使用相对路径
+    return boxDir + "\\encrypted_data\\file_" + std::to_string(fileId) + ".enc";
+}
+
+std::vector<char> DiskReader::ReadEncryptedDataFromFile(std::string boxDir, uint64_t fileId) {
+    std::string dataFilePath = GetDataFilePath(boxDir, fileId);
+    std::ifstream dataFile(dataFilePath, std::ios::binary | std::ios::ate);
+    if (!dataFile.is_open()) {
+        std::cerr << "Failed to open data file: " << dataFilePath << std::endl;
+        return {};
+    }
+    
+    std::streamsize size = dataFile.tellg();
+    dataFile.seekg(0, std::ios::beg);
+    
+    std::vector<char> buffer(size);
+    if (dataFile.read(buffer.data(), size)) {
+        return buffer;
+    }
+    
+    return {};
+}
+
 std::vector<FileEntity> DiskReader::GetFiles(std::string boxPath, std::string privateKeyPath) {
     std::vector<FileEntity> entityQueue;
+
+    std::filesystem::path boxPathObj(boxPath);
+    std::filesystem::path boxDir = boxPathObj.parent_path();
+
     std::ifstream is(boxPath, std::ios::in | std::ios::binary);
 
     if (!is.is_open()) return entityQueue;
@@ -52,6 +83,7 @@ std::vector<FileEntity> DiskReader::GetFiles(std::string boxPath, std::string pr
             readBlob(entity.name);
             readBlob(entity.ext);
             readBlob(entity.mimetype);
+            readBlob(entity.data_path); // 读取数据文件路径
 
             // 3. 读取被 RSA 加密的 AES 密钥
             uint32_t keyLen = 0;
@@ -63,13 +95,16 @@ std::vector<FileEntity> DiskReader::GetFiles(std::string boxPath, std::string pr
             readVal(dataMarker);
             if (dataMarker == DiskType::DATA) {
                 if (entity.type != FOLDER) {
-                    // 4. 读取加密数据大小
+                    // 4. 读取加密数据大小（现在数据在单独文件中）
                     uint64_t encryptedSize = 0;
                     readVal(encryptedSize);
                     
-                    // 5. 读取加密数据
-                    std::vector<char> encryptedData(encryptedSize);
-                    is.read(encryptedData.data(), encryptedSize);
+                    // 5. 从单独文件读取加密数据
+                    std::vector<char> encryptedData = ReadEncryptedDataFromFile(boxDir.string(), entity.id);
+                    if (encryptedData.empty()) {
+                        std::cerr << "Failed to read encrypted data from separate file for fileId: " << entity.id << std::endl;
+                        continue;
+                    }
 
                     // 6. RSA 解密获取 AES Key
                     EVP_PKEY* privkey = CryptoEngine::GetRSAPrivateKey(privateKeyPath);
@@ -166,4 +201,28 @@ std::vector<FileEntity> DiskReader::GetFiles(std::string boxPath, std::string pr
 
     is.close();
     return entityQueue;
+}
+
+FileEntity DiskReader::GetFileById(std::string boxPath, std::string privateKeyPath, uint64_t fileId) {
+    FileEntity result;
+    result.id = 0; // 默认返回空实体
+    
+    std::vector<FileEntity> allFiles = GetFiles(boxPath, privateKeyPath);
+    for (const auto& file : allFiles) {
+        if (file.id == fileId) {
+            return file;
+        }
+    }
+    
+    std::cerr << "File with ID " << fileId << " not found" << std::endl;
+    return result;
+}
+
+std::vector<char> DiskReader::ReadFileData(std::string boxPath, std::string privateKeyPath, uint64_t fileId) {
+    FileEntity file = GetFileById(boxPath, privateKeyPath, fileId);
+    if (file.id == 0) {
+        return {}; // 文件未找到
+    }
+    
+    return file.data;
 }

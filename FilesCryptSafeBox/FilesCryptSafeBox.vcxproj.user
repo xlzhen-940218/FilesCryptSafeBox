@@ -4,4 +4,7 @@
     <LocalDebuggerCommandArguments>"C:\Users\xiong\Downloads\sonic.h"</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup>
+    <ShowAllFiles>true</ShowAllFiles>
+  </PropertyGroup>
 </Project>

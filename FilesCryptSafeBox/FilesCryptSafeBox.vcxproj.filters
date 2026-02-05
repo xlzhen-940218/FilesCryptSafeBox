@@ -41,13 +41,13 @@
     <ClCompile Include="DiskWriter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MimeResolver.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CryptoEngine.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test_new_features.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
